@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="components/lungo/lungo.css">
+    <link rel="stylesheet" href="components/lungo/lungo.icon.css">
+    <link rel="stylesheet" href="components/lungo/lungo.theme.css">
+</head>
+<body>
+    <section id="tasks" data-transition="slide">
+        <header data-title="Tasks">
+            <nav>
+                <button data-icon="menu"></button>
+            </nav>
+            <nav class="on-right">
+                <button data-icon="plus" data-article="normal" data-action="new"></button>
+            </nav>
+        </header>
+        <nav data-control="groupbar">
+            <a href="#" data-view-article="normal" data-icon="inbox" class="active"><abbr>Inbox</abbr></a>
+            <a href="#" data-view-article="high" data-icon="star" data-count="4"><abbr>Inbox</abbr></a>
+        </nav>
+        <article id="normal" class="list scroll"></article>
+        <article id="high" class="list scroll"></article>
+        <footer>
+            <nav class="with-labels">
+                <a href="#" id="pending" data-view-article="normal" data-icon="inbox"></a>
+                <a href="#" id="important" data-view-article="high" data-icon="star" data-count="4"></a>
+            </nav>
+        </footer>
+    </section>
+
+    <section id="task" data-transition="cover">
+        <header data-title="Task" data-back="arrow-left">
+            <nav class="on-right">
+                <button data-action="save" data-icon="inbox"></button>
+            </nav>
+        </header>
+
+        <article class="scroll indented">
+            <div class=" form">
+                <fieldset>
+                    <label>Name</label>
+                    <input type="text" name="name" placeholder="value">
+                </fieldset>
+                <fieldset>
+                    <textarea class="text small" name="description" placeholder="Describe your task"></textarea>
+                </fieldset>
+                <fieldset>
+                    <label>List</label>
+                    <label class="select ">
+                        <select name="list">
+                            <option value="office">Office</option>
+                            <option value="home">Home</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </label>
+
+                    <label>When</label>
+                    <input type="date" name="when" class="align_right" placeholder="Select finish" value="10/04/1980"/>
+
+                    <label class="anchor">Important</label>
+                    <input type="checkbox" name="important" class="inline right" />
+                 </fieldset>
+            </div>
+        </article>
+    </section>
+
+    <script src="components/quojs/quo.js"></script>
+    <script src="components/monocle/monocle.js"></script>
+    <script src="components/lungo/lungo.js"></script>
+    <script src="app/lungo.tasker.js"></script>
+</body>
+</html>
