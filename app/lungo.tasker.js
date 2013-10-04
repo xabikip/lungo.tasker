@@ -31,6 +31,24 @@
       });
     };
 
+    Task.normal = function() {
+      return this.select(function(task) {
+        return task.important === false;
+      });
+    };
+
+    Task.pendingImportant = function() {
+      return this.select(function(task) {
+        return task.important === true && !task.done;
+      });
+    };
+
+    Task.pendingNormal = function() {
+      return this.select(function(task) {
+        return task.important === false && !task.done;
+      });
+    };
+
     return Task;
 
   })(Monocle.Model);
@@ -45,11 +63,13 @@
   __View.Task = (function(_super) {
     __extends(Task, _super);
 
-    Task.prototype.template = "<li {{#done}}data-icon=\"check\"{{/done}}>\n  <div class=\"on-right\">{{list}}<br>{{when}}</div>\n  {{#done}}\n  <div class=\"on-right button\">done</div>\n  {{/done}}\n  <strong>{{name}}</strong>\n  <small>{{description}}</small>\n</li>";
+    Task.prototype.template = "<li id={{uid}}>\n  {{#done}}<span class=\"icon check\"></span>{{/done}}\n  {{^done}}<span class=\"icon check-empty\"></span>{{/done}}\n  <div class=\"on-right\">{{list}}<br>{{when}}</div>\n  <strong>{{name}}</strong>\n  <small>{{description}}</small>\n</li>";
 
     function Task() {
+      this.bindTaskUpdated = __bind(this.bindTaskUpdated, this);
       this.onDone = __bind(this.onDone, this);
       Task.__super__.constructor.apply(this, arguments);
+      __Model.Task.bind("update", this.bindTaskUpdated);
       this.append(this.model);
     }
 
@@ -71,11 +91,40 @@
     };
 
     Task.prototype.onDelete = function(event) {
-      return __Controller.Task["delete"](this.model);
+      var _this = this;
+      return Lungo.Notification.confirm({
+        icon: "question-sign",
+        title: "Confirm delete",
+        description: "Are you sure to delete task?",
+        accept: {
+          icon: "ok",
+          label: "accept",
+          callback: function() {
+            _this.remove();
+            return _this.model.destroy();
+          }
+        },
+        cancel: {
+          icon: "remove",
+          label: "Cancel",
+          callback: function() {
+            return _this;
+          }
+        }
+      });
     };
 
     Task.prototype.onView = function(event) {
       return __Controller.Task.show(this.model);
+    };
+
+    Task.prototype.bindTaskUpdated = function(task) {
+      if (task.uid === this.model.uid) {
+        this.model = task;
+        this.refresh();
+      }
+      Lungo.Notification.hide();
+      return Lungo.Router.back();
     };
 
     return Task;
@@ -113,7 +162,12 @@
     TaskCtrl.prototype.onSave = function(event) {
       if (this.current) {
         Lungo.Notification.show();
-        return __Model.Task.updateAttributes;
+        this.current.name = this.name.val();
+        this.current.description = this.description.val();
+        this.current.list = this.list.val();
+        this.current.when = this.when.val();
+        this.current.important = this.important[0].checked;
+        return this.current.save();
       } else {
         Lungo.Notification.show();
         return __Model.Task.create({
@@ -126,15 +180,13 @@
       }
     };
 
-    TaskCtrl.prototype["delete"] = function(event) {
-      __Model.Task["delete"](this.model);
-      return console.log(event);
-    };
-
     TaskCtrl.prototype._new = function(current) {
       this.current = current != null ? current : null;
       this.name.val("");
       this.description.val("");
+      this.list.val("");
+      this.when.val("");
+      this.important[0].checked = false;
       return Lungo.Router.section("task");
     };
 
@@ -142,6 +194,9 @@
       this.current = current;
       this.name.val(this.current.name);
       this.description.val(this.current.description);
+      this.list.val(this.current.list);
+      this.when.val(this.current.when);
+      this.important[0].checked(this.current.important);
       return Lungo.Router.section("task");
     };
 
@@ -194,6 +249,7 @@
         model: task,
         container: "article#" + context + " ul"
       });
+      this.updateCounters();
       Lungo.Router.back();
       return Lungo.Notification.hide();
     };
@@ -205,7 +261,16 @@
       });
     };
 
-    TasksCtrl.prototype.bindTaskChanged = function(task) {};
+    TasksCtrl.prototype.bindTaskChanged = function(task) {
+      Lungo.Router.back();
+      Lungo.Notification.hide();
+      return this.updateCounters();
+    };
+
+    TasksCtrl.prototype.updateCounters = function() {
+      Lungo.Element.count("#important", __Model.Task.pendingImportant().length);
+      return Lungo.Element.count("#pending", __Model.Task.pendingNormal().length);
+    };
 
     return TasksCtrl;
 
@@ -214,25 +279,7 @@
   $$(function() {
     var Tasks;
     Lungo.init({});
-    Tasks = new __Controller.TasksCtrl("section#tasks");
-    __Model.Task.create({
-      name: "tarea uno name",
-      description: "descripcion de la tarea 1",
-      list: "home",
-      when: "10/08/2013"
-    });
-    __Model.Task.create({
-      name: "comer y correr",
-      description: "descripcion de la tarea 2",
-      list: "office",
-      when: "10/21/2013"
-    });
-    return __Model.Task.create({
-      name: "limpiar casa",
-      description: "descripcion de la tarea",
-      list: "home",
-      when: "10/21/2013"
-    });
+    return Tasks = new __Controller.TasksCtrl("section#tasks");
   });
 
 }).call(this);

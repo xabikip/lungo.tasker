@@ -1,11 +1,10 @@
 class __View.Task extends Monocle.View
 
   template  : """
-    <li {{#done}}data-icon="check"{{/done}}>
+    <li id={{uid}}>
+      {{#done}}<span class="icon check"></span>{{/done}}
+      {{^done}}<span class="icon check-empty"></span>{{/done}}
       <div class="on-right">{{list}}<br>{{when}}</div>
-      {{#done}}
-      <div class="on-right button">done</div>
-      {{/done}}
       <strong>{{name}}</strong>
       <small>{{description}}</small>
     </li>
@@ -13,6 +12,7 @@ class __View.Task extends Monocle.View
 
   constructor: ->
     super
+    __Model.Task.bind "update", @bindTaskUpdated
     @append @model
 
   events:
@@ -27,9 +27,30 @@ class __View.Task extends Monocle.View
       @model.updateAttributes done: true
       @refresh()
     
-
   onDelete: (event) ->
-    __Controller.Task.delete @model
+    Lungo.Notification.confirm
+      icon: "question-sign",
+      title: "Confirm delete"
+      description: "Are you sure to delete task?"
+      accept:
+        icon: "ok"
+        label: "accept"
+        callback: =>
+          @remove()
+          @model.destroy()
+      cancel:
+        icon: "remove"
+        label: "Cancel"
+        callback: =>
+          @
+
 
   onView: (event) ->
     __Controller.Task.show @model
+
+  bindTaskUpdated: (task) =>
+    if task.uid is @model.uid
+      @model = task
+      @refresh()
+    Lungo.Notification.hide()
+    Lungo.Router.back()

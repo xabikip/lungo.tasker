@@ -20,9 +20,12 @@ class TaskCtrl extends Monocle.Controller
   onSave: (event) ->
     if @current
       Lungo.Notification.show()
-      __Model.Task.updateAttributes
-        
-
+      @current.name = @name.val()
+      @current.description = @description.val()
+      @current.list = @list.val()
+      @current.when = @when.val()
+      @current.important = @important[0].checked
+      @current.save()
     else
       # New task
       Lungo.Notification.show()
@@ -32,24 +35,25 @@ class TaskCtrl extends Monocle.Controller
         list        : @list.val()
         when        : @when.val()
         important   : @important[0].checked
-
-
-  delete: (event) ->
-      __Model.Task.delete @model
-      console.log (event)
-      
       
 
   # Private Methods
   _new: (@current=null) ->
     @name.val ""
     @description.val ""
+    @list.val ""
+    @when.val ""
+    @important[0].checked = false
     Lungo.Router.section "task"
 
   _show: (@current) ->
     @name.val @current.name
     @description.val @current.description
+    @list.val @current.list
+    @when.val @current.when
+    @important[0].checked @current.important
     Lungo.Router.section "task"
+
 
 $$ ->
   __Controller.Task = new TaskCtrl "section#task"

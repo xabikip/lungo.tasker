@@ -8,3 +8,9 @@ class __Model.Task extends Monocle.Model
 
   @important: -> @select (task) -> task.important is true
 
+  @normal: -> @select (task) -> task.important is false
+
+  @pendingImportant: -> @select (task) -> task.important is true and !task.done
+
+  @pendingNormal: -> @select (task) -> task.important is false and !task.done
+

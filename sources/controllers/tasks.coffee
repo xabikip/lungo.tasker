@@ -22,6 +22,7 @@ class __Controller.TasksCtrl extends Monocle.Controller
     bindTaskCreated: (task) =>
       context = if task.important is true then "high" else "normal"
       new __View.Task model: task, container: "article##{context} ul"
+      @updateCounters()
       Lungo.Router.back()
       Lungo.Notification.hide()
 
@@ -29,8 +30,20 @@ class __Controller.TasksCtrl extends Monocle.Controller
       __Model.Task.destroy()
       new __View.Task model: task
 
-    
-    bindTaskChanged: (task) =>
+    bindTaskChanged: (task)=>
+      Lungo.Router.back()
+      Lungo.Notification.hide()
+      @updateCounters()
+
+
+    updateCounters: ->
+      Lungo.Element.count "#important", __Model.Task.pendingImportant().length
+      Lungo.Element.count "#pending", __Model.Task.pendingNormal().length
+
+
+
+  
+      
       
       
 
@@ -39,8 +52,5 @@ $$ ->
   Tasks = new __Controller.TasksCtrl "section#tasks"
 
 
-  __Model.Task.create name:"tarea uno name", description: "descripcion de la tarea 1", list: "home", when: "10/08/2013"
-  __Model.Task.create name:"comer y correr", description: "descripcion de la tarea 2", list: "office", when: "10/21/2013"
-  __Model.Task.create name:"limpiar casa", description: "descripcion de la tarea", list: "home", when: "10/21/2013"
-
+ 
 
